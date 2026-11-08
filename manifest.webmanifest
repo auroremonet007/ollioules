@@ -1,0 +1,16 @@
+{
+  "name": "Sur les traces d'Ollioules",
+  "short_name": "Ollioules",
+  "description": "Un jeu de piste pour découvrir Ollioules en famille ou en classe.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F4EF",
+  "theme_color": "#F2F4EF",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
