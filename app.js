@@ -23,7 +23,7 @@
   // Doit rester identique à outils/import_parcours.py.
   function norm(t) {
     if (t == null) return "";
-    var s = String(t).trim().toLowerCase();
+    var s = String(t).trim().toLowerCase().replace(/[\u2018\u2019\u02bc]/g, "'");  // apostrophes de l'iPhone
     s = s.normalize("NFD").replace(/[̀-ͯ]/g, "");
     s = s.replace(/^(le |la |les |l'|un |une |des |du |de la |de |d')/, "");
     s = s.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
@@ -238,12 +238,16 @@
       h += '<div class="retour juste">' + ICONE_OK + "<div><b>Bonne réponse : " + esc(bonne) + ".</b> " + quand_ + ", +" + d.gain + " points.</div></div>";
     }
 
-    // La photo accompagne chaque bonne réponse ; le texte d'explication ne vient qu'à la fin de l'étape.
-    h += photo(q.image, "étape " + (S.etape + 1));
-
+    // Photos et explication ne s'affichent qu'à la fin de l'étape, après toutes ses questions.
+    // Si plusieurs questions partagent la même photo, elle n'apparaît qu'une fois.
     if (dernier) {
       var texte = e.explication_fr;
       var provisoire = !texte;
+      var vues = [];
+      e.questions.forEach(function (x) { if (x.image && vues.indexOf(x.image) === -1) vues.push(x.image); });
+      h += vues.length
+        ? vues.map(function (f) { return photo(f, "étape " + (S.etape + 1)); }).join("")
+        : photo(null, "étape " + (S.etape + 1));
       h += '<section><p class="surtitre vert">Ce qu\'il faut savoir</p><p class="lecture" style="margin-top:8px">' + esc(texte || LOREM) + "</p>" +
         (provisoire ? '<p class="petit doux" style="margin-top:8px">Texte provisoire en attendant la rédaction définitive.</p>' : "") + "</section>";
     }

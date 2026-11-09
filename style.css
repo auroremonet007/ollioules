@@ -79,7 +79,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .doux { color: var(--encre-2); }
 .petit { font-size: 13px; }
-.lecture { font-size: 17px; line-height: 1.6; color: #24343C; }
+.lecture { font-size: 17px; line-height: 1.6; color: #24343C; white-space: pre-line; }
 
 /* ---------- boutons ---------- */
 button { font-family: inherit; cursor: pointer; }
