@@ -9,7 +9,6 @@
   var CLE = "jdp-ollioules-v2";
   var app = document.getElementById("app");
   var N = D.etapes.length;
-  var LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
   /* ------------------------------------------------------------ utilitaires */
 
@@ -238,18 +237,10 @@
       h += '<div class="retour juste">' + ICONE_OK + "<div><b>Bonne réponse : " + esc(bonne) + ".</b> " + quand_ + ", +" + d.gain + " points.</div></div>";
     }
 
-    // Photos et explication ne s'affichent qu'à la fin de l'étape, après toutes ses questions.
-    // Si plusieurs questions partagent la même photo, elle n'apparaît qu'une fois.
-    if (dernier) {
-      var texte = e.explication_fr;
-      var provisoire = !texte;
-      var vues = [];
-      e.questions.forEach(function (x) { if (x.image && vues.indexOf(x.image) === -1) vues.push(x.image); });
-      h += vues.length
-        ? vues.map(function (f) { return photo(f, "étape " + (S.etape + 1)); }).join("")
-        : photo(null, "étape " + (S.etape + 1));
-      h += '<section><p class="surtitre vert">Ce qu\'il faut savoir</p><p class="lecture" style="margin-top:8px">' + esc(texte || LOREM) + "</p>" +
-        (provisoire ? '<p class="petit doux" style="margin-top:8px">Texte provisoire en attendant la rédaction définitive.</p>' : "") + "</section>";
+    // La photo et l'explication appartiennent à la question : elles suivent chaque réponse.
+    h += photo(q.image, "étape " + (S.etape + 1));
+    if (q.explication_fr) {
+      h += '<section><p class="surtitre vert">Ce qu\'il faut savoir</p><p class="lecture" style="margin-top:8px">' + esc(q.explication_fr) + "</p></section>";
     }
     h += '<div class="pousse"></div><button class="bouton" data-act="suite">' +
       (!dernier ? "Question suivante" : S.etape >= N - 1 ? "Voir mon score" : "Étape suivante") + "</button>";
