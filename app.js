@@ -150,7 +150,7 @@
         '<button class="bouton-2" data-act="recommencer">Recommencer depuis le début</button></div>';
     } else {
       h += '<div class="entete-accueil"><p class="surtitre">' + esc(P.ville) + ' · Var</p><h1 class="titre-accueil">' + esc(P.titre_fr) + "</h1></div>" +
-        photo(P.photo_accueil, "vue d'Ollioules") +
+        photo(P.photo_accueil, "vue d'Ollioules").replace('class="photo"', 'class="photo photo-accueil"') +
         (P.description_fr ? '<p class="doux" style="color:#33424A">' + esc(P.description_fr) + "</p>" : "") +
         '<div class="meta"><span><b>' + N + "</b> étapes</span><span><b>≈ " + esc(P.duree_estimee_min || "?") + "</b> min</span><span><b>" + nbQ + "</b> questions</span></div>" +
         '<div class="depart">' + ICONE_LIEU + '<div><p class="surtitre">Point de départ</p><p>' + esc(P.depart_description_fr || "[Lieu de départ à confirmer]") + "</p></div></div>" +

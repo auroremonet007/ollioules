@@ -410,3 +410,6 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .carte-cadre.plein .carte-recentrer { top: max(10px, env(safe-area-inset-top)); }
 body.carte-ouverte { overflow: hidden; }
 .badge-olivier { display: block; margin: 0 auto; }
+
+/* ---------- photo d'accueil ---------- */
+.photo-accueil { max-height: 300px; object-position: center 40%; }
