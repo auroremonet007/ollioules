@@ -221,7 +221,24 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   overflow: hidden;
   background: var(--blanc);
 }
-#carte { height: 190px; width: 100%; background: #E8EDDC; }
+.carte-cadre { position: relative; }
+#carte { height: 250px; width: 100%; background: #E8EDDC; }
+.carte-recentrer {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--bleu);
+  color: var(--blanc);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.carte-recentrer[hidden] { display: none; }
 .carte-off { padding: 24px 16px; text-align: center; color: var(--encre-2); font-size: 14px; }
 .carte-legende {
   display: flex;
@@ -247,7 +264,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   font-weight: 700;
   font-size: 14px;
 }
-.pin-cible { background: var(--olive); color: var(--blanc); }
+.pin-cible { background: var(--olive); color: var(--blanc); box-shadow: 0 0 0 7px rgba(85, 103, 43, 0.3); }
 .pin-ok { background: var(--olive-pale); border-color: var(--olive); color: var(--olive); }
 
 /* ---------- chemin ---------- */

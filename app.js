@@ -73,7 +73,8 @@
   /* ----------------------------------------------------------------- état */
 
   var S = null;      // partie en cours
-  var pos = null;    // position du joueur {lat, lng}, si disponible
+  var pos = null;    // position du joueur {lat, lng, prec}, si disponible
+  var gps = "attente";  // attente | ok | refuse | absent
 
   function neuve() {
     return { etape: 0, question: 0, essais: 0, faux: [], score: 0, detail: [],
@@ -89,13 +90,17 @@
 
   var surveillance = false;
   function suivre() {
-    if (surveillance || !navigator.geolocation) return;
+    if (surveillance) return;
+    if (!navigator.geolocation) { gps = "absent"; return; }
     surveillance = true;
     navigator.geolocation.watchPosition(function (p) {
-      pos = { lat: p.coords.latitude, lng: p.coords.longitude };
+      gps = "ok";
+      pos = { lat: p.coords.latitude, lng: p.coords.longitude, prec: p.coords.accuracy };
       majPosition();
-    }, function () { /* le jeu reste jouable sans GPS */ },
-    { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 });
+    }, function (err) {
+      // Le jeu reste jouable sans GPS : seule la carte perd votre position.
+      if (err && err.code === 1) { gps = "refuse"; majLegende(); }
+    }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 });
   }
 
   /* ---------------------------------------------------------- éléments communs */
@@ -180,7 +185,7 @@
     var e = D.etapes[S.etape], q = e.questions[S.question];
     var h = entete(e);
 
-    h += '<section class="carte-cadre"><div id="carte"></div><div class="carte-legende"><span>Seule l\'étape suivante est révélée</span><strong id="dist">position inconnue</strong></div></section>';
+    h += '<section class="carte-cadre"><div id="carte"></div><button id="recentrer" class="carte-recentrer" data-act="recentrer" hidden>Recentrer</button><div class="carte-legende"><span>Seule l\'étape suivante est révélée</span><strong id="dist">position inconnue</strong></div></section>';
 
     if (e.chemin_description_fr) {
       h += '<div class="chemin"><div><p class="surtitre">Pour y aller</p><p>' + esc(e.chemin_description_fr) + "</p></div></div>";
@@ -262,59 +267,127 @@
 
   /* ----------------------------------------------------------------- carte */
 
-  var carte = null, marqueurMoi = null, halo = null, cible = null;
+  var carte = null, marqueurMoi = null, halo = null, cible = null, precedent = null;
+  var manuel = false;        // le joueur a déplacé ou zoomé la carte lui-même
+  var cadrageAuto = false;   // vrai pendant un recadrage fait par le jeu
+  var dernierCadrage = 0;
+  var delaiCadrage = null;   // recadrage différé, pour ne pas bouger la carte à chaque point GPS
+
+  function point(e) { return [Number(e.latitude), Number(e.longitude)]; }
 
   function monterCarte() {
     var el = document.getElementById("carte");
     if (carte) { carte.remove(); carte = null; marqueurMoi = null; halo = null; }
+    clearTimeout(delaiCadrage); delaiCadrage = null;
     if (!el) return;
     if (!window.L) { el.innerHTML = '<p class="carte-off">Carte indisponible : connexion perdue. Le jeu reste jouable.</p>'; return; }
 
-    var e = D.etapes[S.etape];
+    var P = D.parcours, e = D.etapes[S.etape];
+    var depart = (P.depart_latitude != null && P.depart_longitude != null)
+      ? [Number(P.depart_latitude), Number(P.depart_longitude)] : null;
     cible = { lat: Number(e.latitude), lng: Number(e.longitude) };
+    precedent = S.etape > 0 ? point(D.etapes[S.etape - 1]) : depart;
+    manuel = false;
+    montrerRecentrer(false);
+
     carte = L.map(el, { zoomControl: false, attributionControl: true });
     carte.attributionControl.setPrefix(false);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(carte);
 
-    var pts = [];
-    var P = D.parcours;
-    if (P.depart_latitude != null && P.depart_longitude != null) {
-      var dep = [Number(P.depart_latitude), Number(P.depart_longitude)];
-      pts.push(dep);
-      L.circleMarker(dep, { radius: 6, color: "#25577F", weight: 3, fillColor: "#FFFFFF", fillOpacity: 1 }).addTo(carte);
+    if (depart) {
+      L.circleMarker(depart, { radius: 6, color: "#25577F", weight: 3, fillColor: "#FFFFFF", fillOpacity: 1 }).addTo(carte);
     }
-    // Seules les étapes déjà franchies et la suivante apparaissent.
+    // Seules les étapes déjà franchies et la suivante apparaissent. Les trajets faits sont en trait
+    // plein pâle ; le trajet à faire est en pointillé bleu épais, calé sur les rues.
     for (var i = 0; i <= S.etape; i++) {
-      var s = D.etapes[i], p = [Number(s.latitude), Number(s.longitude)], courante = i === S.etape;
-      var avant = pts.length ? pts[pts.length - 1] : null;
-      if (avant) {
-        L.polyline([avant, p], courante
-          ? { color: "#25577F", weight: 4, dashArray: "1 8", lineCap: "round" }
+      var s = D.etapes[i], courante = i === S.etape;
+      var avant = i > 0 ? point(D.etapes[i - 1]) : depart;
+      var ligne = (s.trace && s.trace.length > 1) ? s.trace : (avant ? [avant, point(s)] : null);
+      if (ligne) {
+        L.polyline(ligne, courante
+          ? { color: "#25577F", weight: 5, opacity: 0.95, dashArray: "1 9", lineCap: "round" }
           : { color: "#9DB7CC", weight: 4 }).addTo(carte);
       }
-      pts.push(p);
-      L.marker(p, { icon: L.divIcon({
+      L.marker(point(s), { icon: L.divIcon({
         className: "", iconSize: [28, 28], iconAnchor: [14, 14],
         html: courante ? '<div class="pin pin-cible">' + (i + 1) + "</div>" : '<div class="pin pin-ok">✓</div>'
-      }), keyboard: false }).addTo(carte);
+      }), keyboard: false, zIndexOffset: courante ? 1000 : 0 }).addTo(carte);
     }
-    carte.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 18 });
+
+    // Dès que le joueur touche la carte, on cesse de la recadrer à sa place.
+    // Seuls les vrais gestes comptent (glisser, molette, double toucher, pincement) : le zoom
+    // automatique de la carte, lui, ne doit jamais faire apparaître « Recentrer ».
+    function geste() { manuel = true; montrerRecentrer(true); }
+    carte.on("dragstart", geste);
+    el.addEventListener("wheel", geste, { passive: true });
+    el.addEventListener("dblclick", geste);
+    el.addEventListener("touchstart", function (ev) { if (ev.touches && ev.touches.length > 1) geste(); }, { passive: true });
+    carte.on("moveend", function () { cadrageAuto = false; });
+
+    cadrer(false);
     majPosition();
   }
 
-  function majPosition() {
+  // Cadre la carte sur le trajet à faire : de la position du joueur (si elle est dans le village)
+  // ou de l'étape précédente, jusqu'au lieu de la question.
+  function cadrer(anime) {
+    if (!carte || !cible) return;
+    var pts;
+    if (pos && distance(pos, cible) < 800) {
+      pts = [[pos.lat, pos.lng], [cible.lat, cible.lng]];
+    } else {
+      var trace = D.etapes[S.etape].trace;
+      pts = (trace && trace.length > 1) ? trace.slice() : (precedent ? [precedent] : []);
+      pts.push([cible.lat, cible.lng]);
+    }
+    carte.invalidateSize(false);   // la taille a pu changer (rotation, barre d'adresse) : on la relit avant de cadrer
+    var taille = carte.getSize();
+    if (!taille.x || !taille.y) return;   // carte pas encore affichée : un cadrage ici dézoomerait sur le monde entier
+    cadrageAuto = true;
+    dernierCadrage = Date.now();
+    setTimeout(function () { cadrageAuto = false; }, 800);   // filet : si la vue ne bouge pas, moveend ne vient pas
+    if (pts.length === 1) carte.setView(pts[0], 18, { animate: !!anime });
+    else carte.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 19, animate: !!anime });
+  }
+
+  function montrerRecentrer(oui) {
+    var b = document.getElementById("recentrer");
+    if (b) b.hidden = !oui;
+  }
+
+  function formaterDistance(m) {
+    return m >= 1000 ? (m / 1000).toFixed(1).replace(".", ",") + " km" : Math.round(m) + " m";
+  }
+
+  function majLegende() {
     var d = document.getElementById("dist");
-    if (!pos || !cible) return;
-    if (carte) {
-      if (!marqueurMoi) {
-        halo = L.circleMarker([pos.lat, pos.lng], { radius: 13, stroke: false, fillColor: "#25577F", fillOpacity: 0.18 }).addTo(carte);
-        marqueurMoi = L.circleMarker([pos.lat, pos.lng], { radius: 6, color: "#FFFFFF", weight: 2.5, fillColor: "#25577F", fillOpacity: 1 }).addTo(carte);
-      } else {
-        marqueurMoi.setLatLng([pos.lat, pos.lng]);
-        halo.setLatLng([pos.lat, pos.lng]);
+    if (!d) return;
+    if (pos && cible) d.textContent = formaterDistance(distance(pos, cible)) + " · " + cap(pos, cible);
+    else if (gps === "refuse") d.textContent = "localisation refusée";
+    else d.textContent = "position inconnue";
+  }
+
+  function majPosition() {
+    majLegende();
+    if (!pos || !carte) return;
+    var ll = [pos.lat, pos.lng], rayon = Math.max(8, Math.min(pos.prec || 0, 80));
+    if (!marqueurMoi) {
+      halo = L.circle(ll, { radius: rayon, stroke: false, fillColor: "#25577F", fillOpacity: 0.16 }).addTo(carte);
+      marqueurMoi = L.circleMarker(ll, { radius: 7, color: "#FFFFFF", weight: 3, fillColor: "#25577F", fillOpacity: 1 }).addTo(carte);
+      if (!manuel) cadrer(true);   // première position : on cadre tout de suite
+    } else {
+      marqueurMoi.setLatLng(ll);
+      halo.setLatLng(ll);
+      halo.setRadius(rayon);
+      if (!manuel) {
+        var ecoule = Date.now() - dernierCadrage;
+        if (ecoule > 5000) cadrer(true);
+        else if (!delaiCadrage) {
+          // trop tôt : on recadrera sur la dernière position connue dès que le délai est écoulé
+          delaiCadrage = setTimeout(function () { delaiCadrage = null; if (!manuel && carte) cadrer(true); }, 5000 - ecoule);
+        }
       }
     }
-    if (d) d.textContent = Math.round(distance(pos, cible)) + " m · " + cap(pos, cible);
   }
 
   /* ------------------------------------------------------------ navigation */
@@ -377,6 +450,7 @@
     if (!b || b.tagName === "FORM") return;
     var act = b.getAttribute("data-act");
 
+    if (act === "recentrer") { manuel = false; montrerRecentrer(false); return cadrer(true); }
     if (act === "accueil") { return accueil(); }   // la partie reste sauvegardée
     if (act === "commencer") { return avertissement(); }
     if (act === "demarrer") { S = neuve(); sauver(); suivre(); return aller("etape"); }
