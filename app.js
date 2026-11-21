@@ -12,6 +12,9 @@
 
   /* ------------------------------------------------------------ utilitaires */
 
+  // Typographie française : espace insécable avant « : ; ! ? », pour qu'ils restent accrochés au mot.
+  function typo(t) { return esc(t).replace(/ ([:;!?])/g, "\u00a0$1"); }
+
   function esc(t) {
     return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -140,7 +143,7 @@
     if (sauve && !sauve.fini) {
       var cran = "";
       for (var i = 0; i < N; i++) cran += '<i class="' + (i < sauve.etape ? "fait" : i === sauve.etape ? "ici" : "") + '"></i>';
-      h += '<div class="entete-accueil"><p class="surtitre">' + esc(P.ville) + ' · Var</p><h1 class="titre-accueil">' + esc(P.titre_fr) + "</h1></div>" +
+      h += '<div class="entete-accueil"><p class="surtitre">' + esc(P.ville) + ' · Var</p><h1 class="titre-accueil">' + typo(P.titre_fr) + "</h1></div>" +
         '<section class="partie"><p class="surtitre">Votre partie en cours</p>' +
         '<div class="partie-ligne"><p class="grand">Étape ' + (sauve.etape + 1) + " sur " + N + '</p><p class="points">' + sauve.score + " pts</p></div>" +
         '<div class="jauge" aria-hidden="true">' + cran + "</div>" +
@@ -149,7 +152,7 @@
         '<button class="bouton" data-act="reprendre">Reprendre à l\'étape ' + (sauve.etape + 1) + "</button>" +
         '<button class="bouton-2" data-act="recommencer">Recommencer depuis le début</button></div>';
     } else {
-      h += '<div class="entete-accueil"><p class="surtitre">' + esc(P.ville) + ' · Var</p><h1 class="titre-accueil">' + esc(P.titre_fr) + "</h1></div>" +
+      h += '<div class="entete-accueil"><p class="surtitre">' + esc(P.ville) + ' · Var</p><h1 class="titre-accueil">' + typo(P.titre_fr) + "</h1></div>" +
         photo(P.photo_accueil, "vue d'Ollioules").replace('class="photo"', 'class="photo photo-accueil"') +
         (P.description_fr ? '<p class="doux" style="color:#33424A">' + esc(P.description_fr) + "</p>" : "") +
         '<div class="meta"><span><b>' + N + "</b> étapes</span><span><b>≈ " + esc(P.duree_estimee_min || "?") + "</b> min</span><span><b>" + nbQ + "</b> questions</span></div>" +

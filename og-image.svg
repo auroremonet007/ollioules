@@ -201,8 +201,9 @@
     <ellipse cx="186" cy="156" rx="8.5" ry="11.5" fill="#2E3818" transform="rotate(-10 186 156)"/>
     <ellipse cx="183.5" cy="152.5" rx="2.2" ry="3.4" fill="#7C8F55"/>
   </g>
-  <text x="70" y="250" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="6" fill="#B9D0E4">OLLIOULES · VAR</text>
-  <text x="70" y="340" font-family="Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="700" fill="#FFFFFF">Sur les traces</text>
-  <text x="70" y="428" font-family="Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="700" fill="#FFFFFF">d’Ollioules</text>
-  <text x="70" y="500" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#DDE9F3">Un jeu de piste en famille ou en classe</text>
+  <text x="70" y="200" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="6" fill="#B9D0E4">JEU DE PISTE · VAR</text>
+  <text x="70" y="295" font-family="Helvetica Neue, Arial, sans-serif" font-size="80" font-weight="700" fill="#FFFFFF">Ollioules :</text>
+  <text x="70" y="385" font-family="Helvetica Neue, Arial, sans-serif" font-size="80" font-weight="700" fill="#FFFFFF">le passé vous</text>
+  <text x="70" y="475" font-family="Helvetica Neue, Arial, sans-serif" font-size="80" font-weight="700" fill="#FFFFFF">défie !</text>
+  <text x="70" y="550" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#DDE9F3">En famille ou en classe</text>
 </svg>
