@@ -374,3 +374,39 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- carte en grand ---------- */
+.carte-agrandir {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--blanc);
+  color: var(--bleu-fonce);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.carte-cadre.plein {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3000;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--sol);
+}
+.carte-cadre.plein #carte { flex: 1; height: auto; min-height: 0; }
+.carte-cadre.plein .carte-legende { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.carte-cadre.plein .carte-agrandir,
+.carte-cadre.plein .carte-recentrer { top: max(10px, env(safe-area-inset-top)); }
+body.carte-ouverte { overflow: hidden; }
+.badge-olivier { display: block; margin: 0 auto; }

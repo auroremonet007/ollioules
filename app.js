@@ -185,7 +185,7 @@
     var e = D.etapes[S.etape], q = e.questions[S.question];
     var h = entete(e);
 
-    h += '<section class="carte-cadre"><div id="carte"></div><button id="recentrer" class="carte-recentrer" data-act="recentrer" hidden>Recentrer</button><div class="carte-legende"><span>Seule l\'étape suivante est révélée</span><strong id="dist">position inconnue</strong></div></section>';
+    h += '<section class="carte-cadre"><div id="carte"></div><button id="agrandir" class="carte-agrandir" data-act="agrandir">Agrandir</button><button id="recentrer" class="carte-recentrer" data-act="recentrer" hidden>Recentrer</button><div class="carte-legende"><span>Seule l\'étape suivante est révélée</span><strong id="dist">position inconnue</strong></div></section>';
 
     if (e.chemin_description_fr) {
       h += '<div class="chemin"><div><p class="surtitre">Pour y aller</p><p>' + esc(e.chemin_description_fr) + "</p></div></div>";
@@ -258,7 +258,7 @@
         (d.revele ? "révélée" : d.essais + " essai" + (d.essais > 1 ? "s" : "")) + " · <b>" + d.pts + "</b></span></div>";
     }).join("");
     montrer(LIEN_ACCUEIL + '<div class="fin-haut">' +
-      '<svg width="132" height="132" viewBox="0 0 120 120" role="img" aria-label="Badge d\'Ollioules"><circle cx="60" cy="60" r="56" fill="#E4EAD3" stroke="#25577F" stroke-width="3"/><circle cx="60" cy="60" r="48" fill="none" stroke="#55672B" stroke-width="1.5"/><path d="M60 24c-12 10-18 20-18 30 0 10 8 17 18 17s18-7 18-17c0-10-6-20-18-30z" fill="#55672B"/><path d="M60 40v36" stroke="#E4EAD3" stroke-width="2" stroke-linecap="round"/><text x="60" y="96" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="11" font-weight="700" letter-spacing="2" fill="#1F4A6B">OLLIOULES</text></svg>' +
+      '<img class="badge-olivier" src="olivier-badge.svg" width="132" height="132" alt="Badge de l\'olivier d\'Ollioules">' +
       "<h1>Parcours terminé</h1>" +
       '<div class="score-grand"><b>' + S.score + "</b><span>/ " + scoreMax() + " points</span></div></div>" +
       '<section class="detail"><p class="surtitre" style="padding-bottom:8px">Détail par étape</p>' + lignes + "</section>" +
@@ -286,6 +286,9 @@
     var depart = (P.depart_latitude != null && P.depart_longitude != null)
       ? [Number(P.depart_latitude), Number(P.depart_longitude)] : null;
     cible = { lat: Number(e.latitude), lng: Number(e.longitude) };
+    // Le point de départ du parcours est la première étape : on ne dessine pas un départ à part.
+    var premiere = D.etapes[0];
+    if (depart && distance({ lat: depart[0], lng: depart[1] }, { lat: Number(premiere.latitude), lng: Number(premiere.longitude) }) < 15) depart = null;
     precedent = S.etape > 0 ? point(D.etapes[S.etape - 1]) : depart;
     manuel = false;
     montrerRecentrer(false);
@@ -350,6 +353,20 @@
     else carte.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 19, animate: !!anime });
   }
 
+  // Carte en grand : elle prend tout l'écran, avec un bouton pour revenir.
+  var plein = false;
+  function basculerPlein(oui) {
+    var cadre = document.querySelector(".carte-cadre");
+    if (!cadre) return;
+    plein = oui === undefined ? !plein : oui;
+    cadre.classList.toggle("plein", plein);
+    document.body.classList.toggle("carte-ouverte", plein);
+    var b = document.getElementById("agrandir");
+    if (b) { b.textContent = plein ? "Réduire" : "Agrandir"; b.setAttribute("aria-label", plein ? "Réduire la carte" : "Agrandir la carte"); }
+    if (carte) setTimeout(function () { carte.invalidateSize(); if (!manuel) cadrer(false); }, 60);
+  }
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && plein) basculerPlein(false); });
+
   function montrerRecentrer(oui) {
     var b = document.getElementById("recentrer");
     if (b) b.hidden = !oui;
@@ -394,6 +411,8 @@
 
   function montrer(html) {
     document.body.classList.remove("ecran-bleu");
+    plein = false;
+    document.body.classList.remove("carte-ouverte");
     app.innerHTML = html;
     if (document.getElementById("carte")) monterCarte();
     window.scrollTo(0, 0);
@@ -450,6 +469,7 @@
     if (!b || b.tagName === "FORM") return;
     var act = b.getAttribute("data-act");
 
+    if (act === "agrandir") { return basculerPlein(); }
     if (act === "recentrer") { manuel = false; montrerRecentrer(false); return cadrer(true); }
     if (act === "accueil") { return accueil(); }   // la partie reste sauvegardée
     if (act === "commencer") { return avertissement(); }
