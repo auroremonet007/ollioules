@@ -413,3 +413,48 @@ body.carte-ouverte { overflow: hidden; }
 
 /* ---------- photo d'accueil ---------- */
 .photo-accueil { max-height: 300px; object-position: center 40%; }
+
+/* ---------- page d'accueil : langue et parcours ---------- */
+.accueil-haut { display: flex; align-items: center; gap: 14px; padding-top: 6px; }
+.accueil-haut .surtitre { max-width: 200px; }
+.bloc-langue { display: flex; flex-direction: column; gap: 8px; }
+.langues { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.langues button {
+  min-height: 52px;
+  border: 1.5px solid var(--trait-fort);
+  border-radius: 12px;
+  background: var(--blanc);
+  color: var(--encre);
+  font-size: 17px;
+  font-weight: 700;
+}
+.langues button.actif { background: var(--bleu); border-color: var(--bleu); color: var(--blanc); }
+.bloc-cours { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.titre-section { font-family: var(--titre); font-size: 30px; line-height: 1.1; font-weight: 700; text-wrap: balance; }
+.cours {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--trait);
+  border-radius: 16px;
+  background: var(--blanc);
+  color: var(--encre);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+}
+.cours:active { border-color: var(--bleu); }
+.cours-photo { display: block; width: 100%; height: 170px; object-fit: cover; object-position: center 40%; }
+.cours-corps { display: flex; flex-direction: column; gap: 6px; padding: 16px; }
+.cours-titre { font-family: var(--titre); font-size: 25px; line-height: 1.15; font-weight: 700; text-wrap: balance; }
+.cours-meta { font-size: 15px; color: var(--encre-2); }
+.cours-cta { margin-top: 4px; color: var(--bleu); font-size: 17px; font-weight: 700; }
+.puce {
+  align-self: flex-start;
+  padding: 4px 11px;
+  border-radius: 14px;
+  background: var(--olive-pale);
+  color: var(--olive-fonce);
+  font-size: 13px;
+  font-weight: 700;
+}
