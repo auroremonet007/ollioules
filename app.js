@@ -415,7 +415,7 @@
 
     var chemin = T(e, "chemin_description");
     if (chemin) {
-      h += '<div class="chemin"><div><p class="surtitre">' + esc(t("pourYAller")) + "</p><p>" + esc(chemin) + "</p></div></div>";
+      h += '<div class="chemin"><div><p class="surtitre">' + esc(t("pourYAller")) + "</p><p>" + typo(chemin) + "</p></div></div>";
     }
 
     if (!q) {
@@ -429,7 +429,7 @@
     var pts = valeur(q, S.essais);
     h += '<section class="panneau"><div><p class="surtitre vert">' + esc(t("vaut", pts, S.essais > 0)) + "</p>" +
       (e.questions.length > 1 ? '<p class="surtitre" style="margin-top:2px">' + esc(t("questionSur", S.question + 1, e.questions.length)) + "</p>" : "") +
-      '<h3 class="question" style="margin-top:8px">' + esc(String(T(q, "enonce") || "").trim()) + "</h3></div>";
+      '<h3 class="question" style="margin-top:8px">' + typo(String(T(q, "enonce") || "").trim()) + "</h3></div>";
 
     if (qcm) {
       var choix = A(q, "choix"), faux = S.fauxIdx || [];
@@ -447,7 +447,7 @@
       var indices = indicesQ.slice(0, Math.min(S.essais, indicesQ.length));
       h += '<div class="retour indice"><b>' + esc(t("pasTout")) + "</b></div>";
       indices.forEach(function (txt, i) {
-        h += '<div class="retour indice">' + esc(t("indice", i + 1, txt)) + "</div>";
+        h += '<div class="retour indice">' + typo(t("indice", i + 1, txt)) + "</div>";
       });
       if (peutReveler(q, S.essais)) {
         h += '<button class="bouton-2" data-act="reveler">' + esc(t("reveler")) + "</button>";
@@ -475,7 +475,7 @@
     h += photo(q.image, t("altEtape", S.etape + 1));
     var expl = T(q, "explication");
     if (expl) {
-      h += '<section><p class="surtitre vert">' + esc(t("savoir")) + '</p><p class="lecture" style="margin-top:8px">' + esc(expl) + "</p></section>";
+      h += '<section><p class="surtitre vert">' + esc(t("savoir")) + '</p><p class="lecture" style="margin-top:8px">' + typo(expl) + "</p></section>";
     }
     h += '<div class="pousse"></div><button class="bouton" data-act="suite">' +
       esc(!dernier ? t("questionSuivante") : S.etape >= N - 1 ? t("voirScore") : t("etapeSuivante")) + "</button>";
